@@ -1,0 +1,8 @@
+a = "asdasd"
+
+
+
+
+
+
+print("hello")
