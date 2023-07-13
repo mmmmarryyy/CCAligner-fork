@@ -7,7 +7,8 @@ class Point(object):
     """
 
     COUNT = 0
-
+    a = 1242314132421 + 123
+    123423 + 1234123
     def __init__(self, x, y):
         '''Defines x and y variables'''
         self.a = "https://www.codingconception.com/python-examples/ \
