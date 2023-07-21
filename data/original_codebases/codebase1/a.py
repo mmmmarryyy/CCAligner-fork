@@ -5,6 +5,10 @@ class Point(object):
     """
     Creates a point on a coordinate plane with values x and y.
     """
+    def bazz(self):
+        f = 123123
+        a = 124432
+        return f + a + f
 
     COUNT = 0
     a = 1242314132421 + 123

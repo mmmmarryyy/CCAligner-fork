@@ -4,6 +4,8 @@ import tokenize
 import glob
 import os
 from tree_sitter import Language, Parser
+from lexical_analysis.obfuscation import Obfuscator
+
 
 AUTOPEP8_LOC = '/home/lokiplot/.local/bin/autopep8'
 
@@ -28,12 +30,13 @@ class PrettyPrinter(object):
         self._without_type1_changes_loc = self._pretty_codebase_loc + "/type1_normalized"
         self._pep8_loc = self._pretty_codebase_loc + "/pep8"
         self._codeblocks_loc = self._pretty_codebase_loc + "/codeblocks"
+        self._obfuscated_loc = self._pretty_codebase_loc + "/obfuscated"
         self.tree = None  # will contain new tree-sitter tree for every file in codebase
         self.cursor = None  # will contain tree's cursor
 
+
     @staticmethod
     def remove_type1_changes_file(file_loc, new_loc):
-        print(f'file_loc in type_1: {file_loc}, new_loc: {new_loc}')
         new_file_name = new_loc + '/' + file_loc.split('/')[-1]  # can create collision
         new_file_content = list()
         prev_token_type = tokenize.INDENT
@@ -116,7 +119,7 @@ class PrettyPrinter(object):
         if node.type == 'block':
             start_line = node.start_point[0]
             end_line = node.end_point[0]
-            codeblock_file_name = f'{storing_loc}/{start_line + 1}_{end_line + 1}'
+            codeblock_file_name = f'{storing_loc}/{start_line + 1}_{end_line + 1}.py'
             self.copy_code_fragment(file_loc, codeblock_file_name, start_line, end_line)
         for child in node.children:
             self.finding_blocks(child, storing_loc, file_loc)
@@ -127,7 +130,7 @@ class PrettyPrinter(object):
         with open(file_loc, "rb") as f:
             content = f.read()
         self.tree = parser.parse(content)
-        storing_loc = new_loc + '/' + file_loc.split('/')[-1]
+        storing_loc = new_loc + '/' + file_loc.split('/')[-1][:-1]
         os.mkdir(storing_loc)
         root_node = self.tree.root_node
         self.finding_blocks(root_node, storing_loc, file_loc)
@@ -138,6 +141,16 @@ class PrettyPrinter(object):
             self.split_to_codeblocks_file(file, self._codeblocks_loc)
         return True
 
+    def obfuscate_codebase(self):
+        os.mkdir(self._obfuscated_loc)
+        for file in glob.glob(self._codeblocks_loc + "/**/*.py", recursive=True):
+            same_dir = self._obfuscated_loc + '/' + file.split('/')[-2]
+            if not os.path.exists(same_dir):
+                os.mkdir(same_dir)
+            ob = Obfuscator(file, same_dir)
+            ob.obfuscate()
+        return True
+
     def pretty_print(self):
         if self.to_pep8_and_copy_codebase():
             print("Brought into proper style")
@@ -145,3 +158,7 @@ class PrettyPrinter(object):
             print("Removed type 1 changes")
         if self.split_to_codeblocks_codebase():
             print("Split to codeblocks")
+        if self.obfuscate_codebase():
+            print("Obfuscated")
+
+

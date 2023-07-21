@@ -2,25 +2,46 @@ from subprocess import run
 from tokenize import generate_tokens, untokenize, NUMBER, STRING, NAME, OP
 import tokenize
 from io import StringIO
+from os import mkdir
+from tree_sitter import Language, Parser
 
 AUTOPEP8_LOC = '/home/lokiplot/.local/bin/autopep8'
 
-"""command = f'{AUTOPEP8_LOC} ../data/normalized_codebases/codebase1/ --recursive --in-place --pep8-passes 2000 --verbose'
-command1 = 'which autopep8'
-command2 = 'ls /home'
-result = run(command, shell=True, capture_output=True, text=True)
 
-if result.returncode == 0:
-    print("Command executed successfully")
-    print("Command output:")
-    print(result.stdout)
-else:
-    print("Command failed")
-    print("Error message:")
-    print(result.stderr)"""
+def print_all_blocks(file_loc):
+  pass
 
-with open('../data/original_codebases/codebase1/b.py', 'r') as f:
-    tokens = generate_tokens(f.readline)
-    for line in f:
-        print(line[0])
+
+Language.build_library(
+  # Store the library in the `build` directory
+  '../build/my-languages.so',
+
+  # Include one or more languages
+  [
+    '../tree-sitter-python'
+  ]
+)
+
+PY_LANGUAGE = Language('../build/my-languages.so', 'python')
+
+parser = Parser()
+parser.set_language(PY_LANGUAGE)
+
+f = open("../data/database2/ds.py", "rb")
+
+content = f.read()
+
+
+tree = parser.parse(content)
+
+cursor = tree.walk()
+assert cursor.node.type == 'module'
+
+root_node = tree.root_node
+
+f = open("../data/original_codebases/codebase1/a.py", "r")
+
+content = f.readlines()
+
+print("".join(content))
 
