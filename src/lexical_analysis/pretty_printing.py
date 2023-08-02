@@ -15,15 +15,22 @@ Language.build_library(
 
   # Include one or more languages
   [
-    'tree-sitter-python'
+    'tree-sitter-python',
+    'tree-sitter-java'
   ]
 )
 
-PY_LANGUAGE = Language('../build/my-languages.so', 'python')
 
 
 class PrettyPrinter(object):
-    def __init__(self, codebase_loc: str, pretty_loc: str):
+    def __init__(self, codebase_loc: str, pretty_loc: str, language: str):
+        self.language = language
+        self.lang_ext = None
+
+        if self.language == 'python':
+            self.lang_ext = '.py'
+        elif self.language == 'java':
+            self.lang_ext = '.java'
         self._codebase_loc = codebase_loc
         self._pretty_codebase_loc = pretty_loc + self._codebase_loc.split('/')[-1]
         os.mkdir(self._pretty_codebase_loc)
@@ -77,7 +84,7 @@ class PrettyPrinter(object):
 
     def remove_type1_changes_in_codebase(self):
         os.mkdir(self._without_type1_changes_loc)
-        for file in glob.glob(self._pep8_loc + "/**/*.py", recursive=True):
+        for file in glob.glob(self._pep8_loc + "/**/*" + self.lang_ext, recursive=True):
             self.remove_type1_changes_file(file, self._without_type1_changes_loc)
         return True
 
@@ -119,14 +126,15 @@ class PrettyPrinter(object):
         if node.type == 'block':
             start_line = node.start_point[0]
             end_line = node.end_point[0]
-            codeblock_file_name = f'{storing_loc}/{start_line + 1}_{end_line + 1}.py'
+            codeblock_file_name = f'{storing_loc}/{start_line + 1}_{end_line + 1}{self.lang_ext}'
             self.copy_code_fragment(file_loc, codeblock_file_name, start_line, end_line)
         for child in node.children:
             self.finding_blocks(child, storing_loc, file_loc)
 
     def split_to_codeblocks_file(self, file_loc, new_loc):
         parser = Parser()
-        parser.set_language(PY_LANGUAGE)
+        language = Language('../build/my-languages.so', self.language)
+        parser.set_language(language)
         with open(file_loc, "rb") as f:
             content = f.read()
         self.tree = parser.parse(content)
@@ -137,17 +145,17 @@ class PrettyPrinter(object):
 
     def split_to_codeblocks_codebase(self):
         os.mkdir(self._codeblocks_loc)
-        for file in glob.glob(self._without_type1_changes_loc + "/**/*.py", recursive=True):
+        for file in glob.glob(self._without_type1_changes_loc + "/**/*" + self.lang_ext, recursive=True):
             self.split_to_codeblocks_file(file, self._codeblocks_loc)
         return True
 
     def obfuscate_codebase(self):
         os.mkdir(self._obfuscated_loc)
-        for file in glob.glob(self._codeblocks_loc + "/**/*.py", recursive=True):
+        for file in glob.glob(self._codeblocks_loc + "/**/*" + self.lang_ext, recursive=True):
             same_dir = self._obfuscated_loc + '/' + file.split('/')[-2]
             if not os.path.exists(same_dir):
                 os.mkdir(same_dir)
-            ob = Obfuscator(file, same_dir)
+            ob = Obfuscator(file, same_dir, self.language)
             ob.obfuscate()
         return True
 

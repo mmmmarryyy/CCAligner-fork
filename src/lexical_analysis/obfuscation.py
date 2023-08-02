@@ -1,11 +1,11 @@
 import re
 from tree_sitter import Language, Parser
 
-PY_LANGUAGE = Language('../build/my-languages.so', 'python')
 
 
 class Obfuscator:
-    def __init__(self, file_loc, file_dest):
+    def __init__(self, file_loc, file_dest, language):
+        self.language = language
         self.file_loc = file_loc
         self.file_dest = file_dest
         self.token_map = dict()  # keys are old ids and values are new ones
@@ -44,7 +44,8 @@ class Obfuscator:
 
     def obfuscate(self):
         parser = Parser()
-        parser.set_language(PY_LANGUAGE)
+        language = Language('../build/my-languages.so', self.language)
+        parser.set_language(language)
         with open(self.file_loc, 'rb') as f:
             content = f.read()
         with open(self.file_loc, 'r') as f:

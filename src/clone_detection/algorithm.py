@@ -3,13 +3,13 @@ import mmh3
 
 
 class CCalignerAlgorithm:
-    def __init__(self, codeblocks_dir, window_size=3, edit_distance=1, theta=0.7):
+    def __init__(self, codeblocks_dir, lang_ext, window_size=3, edit_distance=1, theta=0.7):
         self.dir = codeblocks_dir
         self.q = window_size
         self.e = edit_distance
         self.theta = theta
         self.files = []
-        for file in glob.glob(self.dir + "/**/*.py", recursive=True):
+        for file in glob.glob(self.dir + "/**/*" + lang_ext, recursive=True):
             self.files.append(file)
         self.cand_map = dict()
         self.hash_set = dict()
