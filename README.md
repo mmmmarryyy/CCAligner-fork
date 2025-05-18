@@ -6,7 +6,6 @@ It is required to run ``git clone https://github.com/tree-sitter/tree-sitter-pyt
 
 Example:
 
-``python3 ./src/ccaligner.py -from ./data/original_codebases/c
-odebase1``
+``python3 ./src/ccaligner.py -from ./data/original_codebases/codebase1 --query_file ./data/original_codebases/codebase1/a.py``
 
 

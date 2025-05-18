@@ -1,20 +1,29 @@
 import glob
 import mmh3
+import os
 
 
 class CCalignerAlgorithm:
-    def __init__(self, codeblocks_dir, lang_ext, window_size=3, edit_distance=1, theta=0.7):
+    def __init__(self, codeblocks_dir, lang_ext, window_size=3, edit_distance=1, theta=0.7, query_file=None):
+        if not query_file:
+            raise ValueError("Parameter query_file is mandatory.")
+        if not os.path.isfile(query_file):
+            raise FileNotFoundError(f"Query file not found: {query_file}")
+
         self.dir = codeblocks_dir
         self.q = window_size
         self.e = edit_distance
         self.theta = theta
+        self.query_file = query_file
+
         self.files = []
         for file in glob.glob(self.dir + "/**/*" + lang_ext, recursive=True):
             self.files.append(file)
+
         self.cand_map = dict()
         self.hash_set = dict()
         self.cand_pair = set()
-        self.clone_pair = list()
+        self.clone_pair = []
 
     @staticmethod
     def all_combinations(arr: list, k: int) -> list:
@@ -69,11 +78,16 @@ class CCalignerAlgorithm:
     def run_algo(self):
         for file in self.files:
             self.index_codeblock(file)
+
+        self.index_codeblock(self.query_file)
+
         for mapp in self.cand_map.values():
             if len(mapp) >= 2:
                 hashable_pairs = []
                 for pair in self.all_combinations(list(mapp), 2):
-                    hashable_pairs.append(pair[0] + '|' + pair[1])
+                    if (pair[0] == self.query_file) or (pair[1] == self.query_file):
+                        hashable_pairs.append(pair[0] + '|' + pair[1])
                 self.cand_pair.update(hashable_pairs)
         self.verify_pairs()
+
         return self.clone_pair
