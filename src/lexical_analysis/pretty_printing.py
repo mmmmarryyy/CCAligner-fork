@@ -33,7 +33,7 @@ class PrettyPrinter(object):
             self.lang_ext = '.java'
         self._codebase_loc = codebase_loc
         self._pretty_codebase_loc = pretty_loc + self._codebase_loc.split('/')[-1]
-        os.mkdir(self._pretty_codebase_loc)
+        os.makedirs(self._pretty_codebase_loc, exist_ok=True)
         self._without_type1_changes_loc = self._pretty_codebase_loc + "/type1_normalized"
         self._pep8_loc = self._pretty_codebase_loc + "/pep8"
         self._codeblocks_loc = self._pretty_codebase_loc + "/codeblocks"

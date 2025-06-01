@@ -33,8 +33,8 @@ class Obfuscator:
             if start_col == first_non_indent_char_col:  # checking if this token is first in line
                 self.new_lines[line_num] = self.new_lines[line_num].replace(old_name, new_name, 1)
                 return
-            token_start_new_line = re.search(fr'\W{old_name}\W', self.new_lines[line_num]).start() + 1
-            token_end_new_line = re.search(fr'\W{old_name}\W', self.new_lines[line_num]).end() - 1
+            token_start_new_line = re.search(fr'\b{old_name}\b', self.new_lines[line_num]).start() + 1
+            token_end_new_line = re.search(fr'\b{old_name}\b', self.new_lines[line_num]).end() - 1
             self.new_lines[line_num] = self.new_lines[line_num][:token_start_new_line] + new_name + self.new_lines[line_num][token_end_new_line:]
             return
         if len(node.children) == 0:

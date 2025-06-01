@@ -30,7 +30,7 @@ pp.pretty_print()
 
 final_dir = pretty_loc + codebase_loc.split('/')[-1] + '/' + 'obfuscated'
 
-cca = CCalignerAlgorithm(final_dir, lang_ext, 3, 0, query_file)
+cca = CCalignerAlgorithm(final_dir, lang_ext, 3, 0, query_file=query_file)
 pairs = cca.run_algo()
 for file1, file2 in pairs:
     file_name1 = file1.split('/')[-2]
